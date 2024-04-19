@@ -1,0 +1,244 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Client for Web Service</title>
+    
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Proxima+Nova:wght@400;700&display=swap');
+
+        body {
+            font-family:'Proxima Nova', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #215f6b;
+            
+        }
+        .container {
+           
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin-top: 100px;
+            margin-right: 200px;
+            margin-left: 200px;
+           
+        }
+        .form-container, .response-container {
+            background-color: lightblue;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .form-container h2, .response-container h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group button {
+            padding: 8px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .response-container pre {
+            white-space: pre-wrap;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="form-container">
+        <h2>Web Service Interface</h2>
+        <div class="form-group">
+            <label for="id">ID:</label>
+            <input type="text" id="id" name="id" placeholder="Enter ID">
+        </div>
+        <div class="form-group">
+            <label for="nome">Name:</label>
+            <input type="text" id="nome" name="nome" placeholder="Enter Name">
+        </div>
+        <div class="form-group">
+            <label for="cognome">Surname:</label>
+            <input type="text" id="cognome" name="cognome" placeholder="Enter Surname">
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter Email">
+        </div>
+        <div class="form-group">
+            <label for="eta">Age:</label>
+            <input type="text" id="eta" name="eta" placeholder="Enter Age" >
+        </div>
+        <div class="form-group">
+            <label for="tel">Telephone Number:</label>
+            <input type="text" id="tel" name="tel" placeholder="Enter Telephone Number">
+        </div>
+        <div class="form-group">
+            <button onclick="getData()">GET</button>
+            <button onclick="addData()">POST</button>
+            <button onclick="updateData()">PUT</button>
+            <button onclick="deleteData()">DELETE</button>
+     
+
+    <div class="response-container">
+        <h2>Answer</h2>
+        <div id="response"></div>
+    </div>
+</div>
+
+
+<script>
+ 
+
+  function getData() {
+      var id = document.getElementById("id").value;
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+              document.getElementById("response").innerHTML = formatResponse(this.responseText);
+          }
+      };
+      xhr.open("GET", "http://localhost/webservices/" + id, true);
+      xhr.send();
+      clearInputs();
+  }
+
+  function addData() {
+      var data = {
+          nome: document.getElementById("nome").value,
+          cognome: document.getElementById("cognome").value,
+          email: document.getElementById("email").value,
+          eta: document.getElementById("eta").value,
+          data_iscrizione: document.getElementById("tel").value
+      };
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+          if (this.readyState == 4) {
+              document.getElementById("response").innerHTML = formatResponse(this.responseText);
+          }
+      };
+      xhr.open("POST", "http://localhost/webservices/", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify(data));
+      clearInputs();
+  }
+
+  function updateData() {
+      var id = document.getElementById("id").value;
+      var data = {
+          nome: document.getElementById("nome").value,
+          cognome: document.getElementById("cognome").value,
+          email: document.getElementById("email").value,
+          eta: document.getElementById("eta").value,
+          tel: document.getElementById("tel").value
+      };
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+          if (this.readyState == 4) {
+              document.getElementById("response").innerHTML = formatResponse(this.responseText);
+          }
+      };
+      xhr.open("PUT", "http://localhost/webservices/" + id, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify(data));
+      clearInputs();
+  }
+
+  function deleteData() {
+      var id = document.getElementById("id").value;
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+          if (this.readyState == 4) {
+              document.getElementById("response").innerHTML = formatResponse(this.responseText);
+          }
+      };
+      xhr.open("DELETE", "http://localhost/webservices/" + id, true);
+      xhr.send();
+      clearInputs();
+  }
+
+  function clearInputs() {
+      document.getElementById("id").value = "";
+      document.getElementById("nome").value = "";
+      document.getElementById("cognome").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("eta").value = "";
+      document.getElementById("tel").value = "";
+  }
+
+  function formatResponse(response) {
+  try {
+      var data = JSON.parse(response);
+      if (Array.isArray(data) && data.length > 0) {
+          var table = "<table><thead><tr>";
+          for (var key in data[0]) {
+              table += "<th>" + key + "</th>";
+          }
+          table += "</tr></thead><tbody>";
+          data.forEach(function(item) {
+              table += "<tr>";
+              for (var key in item) {
+                  table += "<td>" + item[key] + "</td>";
+              }
+              table += "</tr>";
+          });
+          table += "</tbody></table>";
+          return table;
+      } else if (typeof data === 'object' && data !== null) {
+          var table = "<table><tbody>";
+          for (var key in data) {
+              table += "<tr><th>" + key + "</th><td>" + data[key] + "</td></tr>";
+          }
+          table += "</tbody></table>";
+          return table;
+      } else {
+          return JSON.stringify(data, null, 2);
+      }
+  } catch (error) {
+      return response;
+  }
+}
+
+</script>
+
+</body>
+</html>
+    
