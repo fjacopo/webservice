@@ -2,38 +2,56 @@
 
 // Connessione al database
 $servername = "localhost";
-$username = "utente1";
-$password = "12345";
-$dbname = "gestioneeventi";
+$username = "utente2";
+$password = "1234";
+$dbname = "server_web";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Verifica della connessione
 if ($conn->connect_error) {
-    die("Connessione fallita: " . $conn->connect_error);
+    http_response_code(500); 
+    die("Failed to connect: " . $conn->connect_error);
 }
 
-//echo $_SERVER['REQUEST_URI'];
+// Validazione dei dati in input
+function validateData($data) {
+    if (
+        !isset($data['nome']) || !is_string($data['nome']) ||
+        !isset($data['cognome']) || !is_string($data['cognome']) ||
+        !isset($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL) ||
+        !isset($data['eta']) || !is_numeric($data['eta']) ||
+        !isset($data['tel']) || !is_numeric($data['tel'])
+    ) {
+        return false;
+    }
+    return true;
+}
 
-$array = explode('/',$_SERVER['REQUEST_URI']);
+$array = explode('/', $_SERVER['REQUEST_URI']);
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method == 'GET') {
     if (count($array) == 3 && $array[2] != '') {
         // Se è specificato un ID nella richiesta GET
         $id = $array[2];
-        $sql = "SELECT * FROM eventi WHERE ID_evento = $id";
-        $result = $conn->query($sql);
+        $sql = "SELECT * FROM dati WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
+            http_response_code(200); 
             echo json_encode($row);
         } else {
-            echo "No result found with ID $id";
+            http_response_code(404); 
+            
         }
     } elseif (count($array) == 3 && $array[2] == '') {
         // Se non è specificato un ID nella richiesta GET
-        $sql = "SELECT * FROM eventi";
+        $sql = "SELECT * FROM dati";
         $result = $conn->query($sql);
         
         if ($result->num_rows > 0) {
@@ -41,33 +59,38 @@ if ($method == 'GET') {
             while ($row = $result->fetch_assoc()) {
                 $rows[] = $row;
             }
+            http_response_code(200);
             echo json_encode($rows);
         } else {
-            echo "No result found in the table.";
+            http_response_code(404); 
+            
         }
     } else {
         // Se il metodo HTTP non è GET
-        http_response_code(405); // Metodo non consentito
-        echo "Method Not Allowed";
+        http_response_code(405); 
+        
     }
 } elseif ($method == 'POST') {
     // Esegui l'inserimento dei dati
     $data = json_decode(file_get_contents("php://input"), true);
 
     // Verifica se i dati sono stati inviati correttamente
-    if (!empty($data)) {
+    if (!empty($data) && validateData($data)) {
         // Esegui l'inserimento nel database
-        $sql = "INSERT INTO eventi (campo1, campo2, campo3) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO dati (nome, cognome, email, eta, tel) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sss", $data['campo1'], $data['campo2'], $data['campo3']);
+        $stmt->bind_param("sssis", $data['nome'], $data['cognome'], $data['email'], $data['eta'], $data['tel']);
 
         if ($stmt->execute()) {
-            echo "Data inserted successfully.";
+            http_response_code(201);
+            
         } else {
-            echo "Error during data insertion.";
+            http_response_code(500); 
+            
         }
     } else {
-        echo "Invalid data.";
+        http_response_code(400); 
+        
     }
 } elseif ($method == 'PUT') {
     // Esegui l'aggiornamento dei dati
@@ -78,17 +101,25 @@ if ($method == 'GET') {
         $id = $array[2];
         
         // Esegui l'aggiornamento nel database
-        $sql = "UPDATE eventi SET campo1=?, campo2=?, campo3=? WHERE ID_evento=?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssi", $data['campo1'], $data['campo2'], $data['campo3'], $id);
+        if (!empty($data) && validateData($data)) {
+            $sql = "UPDATE dati SET nome=?, cognome=?, email=?, eta=?, tel=? WHERE id=?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssssi", $data['nome'], $data['cognome'], $data['email'], $data['eta'], $data['tel'], $id);
 
-        if ($stmt->execute()) {
-            echo "Data updated successfully.";
+            if ($stmt->execute()) {
+                http_response_code(200);
+                
+            } else {
+                http_response_code(500); 
+               
+            }
         } else {
-            echo "Error during data update.";
+            http_response_code(400); 
+            
         }
     } else {
-        echo "ID not specified.";
+        http_response_code(400); 
+        
     }
 } elseif ($method == 'DELETE') {
     // Esegui la cancellazione dei dati
@@ -96,22 +127,25 @@ if ($method == 'GET') {
         $id = $array[2];
         
         // Esegui la cancellazione nel database
-        $sql = "DELETE FROM eventi WHERE ID_evento=?";
+        $sql = "DELETE FROM dati WHERE id=?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id);
 
         if ($stmt->execute()) {
-            echo "Data deleted successfully.";
+            http_response_code(200);
+           
         } else {
-            echo "Error during data deletion.";
+            http_response_code(500); 
+            
         }
     } else {
-        echo "ID not specified.";
+        http_response_code(400); 
+        
     }
 } else {
     // Se il metodo HTTP non è supportato
-    http_response_code(405); // Metodo non consentito
-    echo "Method Not Allowed";
+    http_response_code(405); 
+    
 }
 
 $conn->close();
