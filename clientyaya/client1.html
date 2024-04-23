@@ -1,5 +1,4 @@
-
-    <!DOCTYPE html>
+  <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -128,115 +127,143 @@
 <script>
  
 
-  function getData() {
-      var id = document.getElementById("id").value;
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-          if (this.readyState == 4 && this.status == 200) {
-              document.getElementById("response").innerHTML = formatResponse(this.responseText);
-          }
-      };
-      xhr.open("GET", "http://localhost/webservices/" + id, true);
-      xhr.send();
-      clearInputs();
-  }
+   function getData() {
+        var id = document.getElementById("id").value;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("response").innerHTML = formatResponse(this.responseText);
+            }
+            else{
+                var statusText = translateHTTPCode(this.status);
+                document.getElementById("response").innerHTML = statusText;
+            }
+        };
+        xhr.open("GET", "http://localhost/webservices/" + id, true);
+        xhr.send();
+        clearInputs();
+    }
 
-  function addData() {
-      var data = {
-          nome: document.getElementById("nome").value,
-          cognome: document.getElementById("cognome").value,
-          email: document.getElementById("email").value,
-          eta: document.getElementById("eta").value,
-          data_iscrizione: document.getElementById("tel").value
-      };
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-          if (this.readyState == 4) {
-              document.getElementById("response").innerHTML = formatResponse(this.responseText);
-          }
-      };
-      xhr.open("POST", "http://localhost/webservices/", true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(JSON.stringify(data));
-      clearInputs();
-  }
+    function addData() {
+        var data = {
+            nome: document.getElementById("nome").value,
+            cognome: document.getElementById("cognome").value,
+            email: document.getElementById("email").value,
+            eta: document.getElementById("eta").value,
+            data_iscrizione: document.getElementById("tel").value
+        };
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                var statusText = translateHTTPCode(this.status);
+                document.getElementById("response").innerHTML = statusText;
+            }
+        };
+        xhr.open("POST", "http://localhost/webservices/", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(data));
+        clearInputs();
+    }
 
-  function updateData() {
-      var id = document.getElementById("id").value;
-      var data = {
-          nome: document.getElementById("nome").value,
-          cognome: document.getElementById("cognome").value,
-          email: document.getElementById("email").value,
-          eta: document.getElementById("eta").value,
-          tel: document.getElementById("tel").value
-      };
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-          if (this.readyState == 4) {
-              document.getElementById("response").innerHTML = formatResponse(this.responseText);
-          }
-      };
-      xhr.open("PUT", "http://localhost/webservices/" + id, true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(JSON.stringify(data));
-      clearInputs();
-  }
+    function updateData() {
+        var id = document.getElementById("id").value;
+        var data = {
+            nome: document.getElementById("nome").value,
+            cognome: document.getElementById("cognome").value,
+            email: document.getElementById("email").value,
+            eta: document.getElementById("eta").value,
+            data_iscrizione: document.getElementById("tel").value
+        };
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                var statusText = translateHTTPCode(this.status);
+                document.getElementById("response").innerHTML = statusText;
+            }
+        };
+        xhr.open("PUT", "http://localhost/webservices/" + id, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(data));
+        clearInputs();
+    }
 
-  function deleteData() {
-      var id = document.getElementById("id").value;
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-          if (this.readyState == 4) {
-              document.getElementById("response").innerHTML = formatResponse(this.responseText);
-          }
-      };
-      xhr.open("DELETE", "http://localhost/webservices/" + id, true);
-      xhr.send();
-      clearInputs();
-  }
+    function deleteData() {
+    var id = document.getElementById("id").value;
 
-  function clearInputs() {
-      document.getElementById("id").value = "";
-      document.getElementById("nome").value = "";
-      document.getElementById("cognome").value = "";
-      document.getElementById("email").value = "";
-      document.getElementById("eta").value = "";
-      document.getElementById("tel").value = "";
-  }
+    // Chiede la conferma all'utente
+    var confirmed = confirm("Sei sicuro di voler eliminare questo elemento?");
 
-  function formatResponse(response) {
-  try {
-      var data = JSON.parse(response);
-      if (Array.isArray(data) && data.length > 0) {
-          var table = "<table><thead><tr>";
-          for (var key in data[0]) {
-              table += "<th>" + key + "</th>";
-          }
-          table += "</tr></thead><tbody>";
-          data.forEach(function(item) {
-              table += "<tr>";
-              for (var key in item) {
-                  table += "<td>" + item[key] + "</td>";
-              }
-              table += "</tr>";
-          });
-          table += "</tbody></table>";
-          return table;
-      } else if (typeof data === 'object' && data !== null) {
-          var table = "<table><tbody>";
-          for (var key in data) {
-              table += "<tr><th>" + key + "</th><td>" + data[key] + "</td></tr>";
-          }
-          table += "</tbody></table>";
-          return table;
-      } else {
-          return JSON.stringify(data, null, 2);
-      }
-  } catch (error) {
-      return response;
-  }
+    if (confirmed) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                var statusText = translateHTTPCode(this.status);
+                document.getElementById("response").innerHTML = statusText;
+            }
+        };
+        xhr.open("DELETE", "http://localhost/webservices/" + id, true);
+        xhr.send();
+        clearInputs();
+    } else {
+        // Se l'utente non conferma, non fare nulla
+        return;
+    }
 }
 
+
+    function clearInputs() {
+        document.getElementById("id").value = "";
+        document.getElementById("nome").value = "";
+        document.getElementById("cognome").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("eta").value = "";
+        document.getElementById("tel").value = "";
+    }
+
+    function formatResponse(response) {
+        try {
+            var data = JSON.parse(response);
+            if (Array.isArray(data) && data.length > 0) {
+                var table = "<table><thead><tr>";
+                for (var key in data[0]) {
+                    table += "<th>" + key + "</th>";
+                }
+                table += "</tr></thead><tbody>";
+                data.forEach(function(item) {
+                    table += "<tr>";
+                    for (var key in item) {
+                        table += "<td>" + item[key] + "</td>";
+                    }
+                    table += "</tr>";
+                });
+                table += "</tbody></table>";
+                return table;
+            } else if (typeof data === 'object' && data !== null) {
+                var table = "<table><tbody>";
+                for (var key in data) {
+                    table += "<tr><th>" + key + "</th><td>" + data[key] + "</td></tr>";
+                }
+                table += "</tbody></table>";
+                return table;
+            } else {
+                return JSON.stringify(data, null, 2);
+            }
+        } catch (error) {
+            return response;
+        }
+    }
+
+    function translateHTTPCode(code) {
+        var translations = {
+            200: "Success",
+            201: "Created",
+            400: "Invalid request",
+            404: "Not found",
+            405: "Method not allowed",
+            500: "Internal server error",
+        };
+        return translations[code] || code;
+    }
 </script>
 
 </body>
